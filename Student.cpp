@@ -16,3 +16,12 @@ std::string Student::formatInfo()
 	ss << name << "\t" << sex << "\t" << number << "\t" << date << "\t" << school_year << "\t" << id << "\t" << college << "\t" << major << "\t" << cla << std::endl;
 	return ss.str();
 }
+
+Student Student::fromString(const std::string& str)
+{
+	Student stu;
+	std::stringstream ss(str);
+	ss >> stu.name >> stu.sex >> stu.number >> stu.date >> stu.school_year >> stu.id >> stu.college >> stu.major >> stu.cla;
+
+	return stu;
+}

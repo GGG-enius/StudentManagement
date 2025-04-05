@@ -187,6 +187,16 @@ const std::vector<std::string> Table::split(std::string str, char separator)
 
 void Table::updatePage()
 {
+	if (m_rows == 0 && !m_datas.empty())
+	{
+		m_rows = m_datas.size();
+
+	}
+	if (m_cols == 0 && !m_datas.empty())
+	{
+		m_cols = m_datas.front().find('\t') + 1;
+	}
+
 	//datas 82
 	if (m_rows >= m_datas.size())//只有一页，一页处理
 	{

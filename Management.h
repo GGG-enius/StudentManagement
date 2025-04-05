@@ -43,6 +43,8 @@ public:
 
 	void readFile(const std::string& fileName);
 	void saveFile(const std::string& fileName);
+
+	void updateTable();//更新表格
 private:
 	IMAGE m_bk;
 	ExMessage m_msg; //系统检测到事件（如鼠标）,将自动生成Exmessage消息，然后存在m_msg中
@@ -60,12 +62,17 @@ private:
 private://读取文件 保存学生信息
 	std::string m_header;//保存表头
 	std::vector<Student> vec_stu;
-private: //查看学生表格
-	Table* m_showTable;
+private: 
+	Table* m_showTable;//查看学生表格
+
+	bool isProcessed; // 记录按钮处理状态
 
 	PushButton* m_addBtn;//录入学生的按钮
-	bool isProcessed; // 记录按钮处理状态
 	LineEdit* m_addEdit;//录入学生的输入框
+
+	PushButton* m_delBtn;//删除学生的按钮
+	LineEdit* m_delEdit;//删除学生的输入框
+	Table* m_delTable;//删除学生的表格
 
 private://管理子菜单界面切换
 	enum ManangeState
@@ -76,5 +83,7 @@ private://管理子菜单界面切换
 		Manage_Modify
 	};
 	int m_manageState = Manage_Main;
+private:
+	std::string m_tipText;
 };
 

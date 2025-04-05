@@ -16,6 +16,9 @@ public:
     void setHeader(const std::string& header);//设置表头
     void insertData(const std::string& data);
 
+	int rowCount()const { return m_rows; }
+	int colCount()const { return m_cols; }
+
     void show();
     void drawTableGrid();
     void drawTableData();
@@ -26,6 +29,8 @@ public:
     void updatePage();
 
     void eventLoop(const ExMessage& msg);
+
+	void clear() { m_datas.clear(); }//清空数据
 private:
     int m_rows;
     int m_cols;

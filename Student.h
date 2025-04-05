@@ -7,6 +7,8 @@ public:
 	Student(const std::string& name, const std::string& sex, const std::string& number, const std::string& date,
 		const std::string& school_year, const std::string& id, const std::string& college, const std::string& major, const std::string& cla);
 	std::string formatInfo();//格式化数据
+	static Student fromString(const std::string& str);  //根据字符串构造出Student结构体
+
 public:
 	std::string name;//姓名
 	std::string sex;//性别

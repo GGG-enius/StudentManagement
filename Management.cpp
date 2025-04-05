@@ -3,6 +3,8 @@
 #include <conio.h>
 #include <fstream>
 #include <sstream>
+#include<algorithm>
+
 using namespace std;
 Management::Management()
 {
@@ -52,12 +54,23 @@ Management::Management()
 		int bx = (Window::width() - manage_btns[i]->width()) / 2;
 		int vspace = (Window::height() - manage_btns.size() * manage_btns[i]->height()) / 2;
 		int by = vspace + i * manage_btns[i]->height();
-		manage_btns[i]->move(bx, by+100);
+		manage_btns[i]->move(bx, by+50);
 	}
+	//录入学生界面的按钮和输入框
 	m_addBtn = new PushButton("录入", 900, 260, 80, 30);//录入学生的按钮
 	m_addEdit = new LineEdit(100, 260, 750, 30);
 	m_addEdit->setTitle("请输入学生信息");
 	m_addEdit->setHitText("格式:\n <姓名 性别 学号 入学时间 学制 身份证 学院 专业 班级>");
+
+	//删除学生界面的按钮和输入框
+	m_delBtn = new PushButton("删除", 650, 260, 80, 30);
+	m_delEdit = new LineEdit(440, 260, 200, 30);
+	m_delEdit->setTitle("删除学生");
+	m_delEdit->setHitText("请输入要删除学生的学号:");
+	m_delTable = new Table;//删除学生的表格
+	m_delTable->setHeader(m_header);
+	m_delTable->move(m_delEdit->x()-425, m_delEdit->y() + 100);
+
 	//陈列查询子菜单按钮
 	for (int i = 0; i < search_btns.size(); i++) {
 		search_btns[i]->setFixedSized(250, 50);
@@ -81,10 +94,7 @@ Management::Management()
 	m_showTable->setRowCount(16);
 	m_showTable->setHeader(m_header);
 	m_showTable->move((Window::width()-m_showTable->width())/2, 100);
-	for (auto& val : vec_stu)
-	{
-		m_showTable->insertData(val.formatInfo());
-	}
+	updateTable();
 	//m_backBtnState = 0;
 }
 void Management::run()
@@ -170,6 +180,7 @@ void Management::display()
 void Management::manage()
 {
 	const char* tip;
+	const char* example;
 	switch (m_manageState) {
 	case Manage_Main: // 管理主菜单
 		drawTile();
@@ -184,7 +195,6 @@ void Management::manage()
 			else if (btn->isClicked() && btn->getText() == "删除学生证信息") {
 				m_manageState = Manage_Delete;
 				// 执行删除操作
-				std::cout << "进入删除界面" << std::endl;
 			}
 			else if (btn->isClicked() && btn->getText() == "修改学生证信息") {
 				m_manageState = Manage_Modify;
@@ -203,31 +213,93 @@ void Management::manage()
 		
 		// 显示提示信息
 		tip = "请输入学生信息<姓名 性别 学号 入学时间 学制 身份证 学院 专业 班级>:";
+		example = "例：张三 男 202232310229 2022-09-01 4年 440320200312190344 生命科学学院 生命科学 2";
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip))/2, 150, tip);
-		// 返回管理菜单按钮
+		settextstyle(&originalFont); // 恢复原字体
+		settextstyle(18, 0, "幼圆");
+		outtextxy((Window::width() - textwidth(tip)) / 2 - 100, 200, example);
 		settextstyle(&originalFont); // 恢复原字体
 		m_addBtn->show();
-		m_addBtn->eventLoop(m_msg);
 		m_addEdit->show();
-		m_addEdit->eventLoop(m_msg);
+
 		// 检测按钮点击并确保仅触发一次
-		if (m_addBtn->isClicked()) {
+		if (m_addBtn->isClicked()&&!(m_addEdit->text().empty())) {
 			if (!isProcessed) {
-				std::cout << m_addEdit->text() << std::endl;
+				vec_stu.push_back(Student::fromString(m_addEdit->text()));//存到stu的存储数组
+				auto str = m_addEdit->text();
+				std::replace(str.begin(), str.end(), ' ', '\t');//把输入的空格替换成'\t'，便于分割
+				m_showTable->insertData(str); //存到表格
+				//m_addEdit->text();
+				m_addEdit->clear();
 				isProcessed = true; // 标记已处理
 			}
 		}
 		else {
 			isProcessed = false; // 按钮未点击时重置状态
 		}
+		// 返回管理菜单按钮
 		displayBackBtn(1);
 		break;
 
 	case Manage_Delete://删除信息界面
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
 		// 显示提示信息
 		tip = "请输入要删除学生的学号：";
-		outtextxy(100, 100, tip);
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 150, tip);
+		settextstyle(&originalFont); // 恢复原字体
+
+		m_delBtn->show();
+		m_delEdit->show();
+		//删除的表格显示条件
+		if(m_delTable->rowCount()!=0)
+		{
+			m_delTable->show();
+		}
+		////如果文本改变 进行一个查找
+		if (m_delEdit->textChanged())
+		{
+			auto& str = m_delEdit->text();
+			//对vec_stu的每个元素调用lambda表达式
+			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu)
+				{
+					return stu.number == str;
+				});
+			//没找到
+			if (it == vec_stu.end())
+			{
+				outtextxy(m_delEdit->x(), m_delEdit->y() + 50, std::string("没有找到学号为" + str + "的学生！").data());
+			}
+			else//找到后
+			{
+				m_delTable->insertData(it->formatInfo());//存到表格
+			}
+			//m_delEdit->clear();
+		}
+		//删除按钮逻辑
+		if (m_delBtn->isClicked()&&!m_delEdit->text().empty())
+		{
+			auto& str = m_delEdit->text();
+			/*
+			* 不会直接删除元素，而是将所有需要保留的元素移动到容器前部，
+			   并返回一个迭代器 it，指向新逻辑结尾的位置（即第一个需要删除的元素的位置）
+			*/
+			auto it = std::remove_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu)
+				{
+					return stu.number == str;
+				});
+			//if (it != vec_stu.end())//删除成功时
+			//{
+			//	m_delEdit->clear();
+			//	m_delTable->clear();
+			//}
+			vec_stu.erase(it, vec_stu.end());//删除
+			updateTable();
+			
+		}
 		// 返回管理菜单按钮
 		displayBackBtn(1);
 		break;
@@ -345,6 +417,13 @@ void Management::displayBackBtn(int btnState)
 void Management::eventLoop()
 {
 	m_showTable->eventLoop(m_msg);//把收到的事件消息m_msg传（分发）给表格组件
+	m_delTable->eventLoop(m_msg);
+
+	m_addBtn->eventLoop(m_msg);
+	m_addEdit->eventLoop(m_msg);
+
+	m_delBtn->eventLoop(m_msg);
+	m_delEdit->eventLoop(m_msg);
 }
 
 void Management::readFile(const std::string& fileName)
@@ -400,3 +479,13 @@ void Management::saveFile(const std::string& fileName)
 	}
 	write.close();
 }
+
+void Management::updateTable()
+{
+	m_showTable->clear();
+	for (auto& val : vec_stu)
+	{
+		m_showTable->insertData(val.formatInfo());
+	}
+}
+	

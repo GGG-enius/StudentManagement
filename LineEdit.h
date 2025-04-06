@@ -20,6 +20,7 @@ public:
 	void clear() { m_text.clear(); }//添加成功后 调用清空m_text,即可再次添加
 
 	bool textChanged();
+
 private:
 	std::string m_preText;//上次输入的文本
 	std::string m_text;

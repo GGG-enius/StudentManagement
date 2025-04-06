@@ -76,7 +76,9 @@ private:
 	
 	LineEdit* m_modifyEdit;//修改学生的输入框
 	bool isFind = false;//判断学生有没有找到 
+	bool isFirst = true;///////重点bug!解决setText()函数的bug
 	std::vector<LineEdit*> m_stuEdits;//修改学生信息的输入框
+	std::vector<Student>::iterator m_modifyIt;
 
 private://管理子菜单界面切换
 	enum ManangeState

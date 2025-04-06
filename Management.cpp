@@ -76,7 +76,8 @@ Management::Management()
 	m_modifyEdit->move((Window::width() - m_modifyEdit->width()) / 2, 260);//居中显示
 	m_modifyEdit->setTitle("修改学生");
 	m_modifyEdit->setHitText("请输入要修改学生的学号");
-
+	m_modifyIt = vec_stu.end();
+	//修改学生信息的输入框的对象创建
 	for (int i = 0; i < 9; i++)
 	{
 		m_stuEdits.emplace_back(new LineEdit(0, 0, 130, 30));
@@ -126,7 +127,7 @@ Management::Management()
 			m_stuEdits[i]->setFixedSized(50, 30);
 		}
 		
-	}//修改学生信息的输入框的对象创建
+	}
 
 	//陈列查询子菜单按钮
 	for (int i = 0; i < search_btns.size(); i++) {
@@ -371,11 +372,12 @@ void Management::manage()
 
 			if (it == vec_stu.end()) {
 				// 显示未找到
+				m_modifyIt = vec_stu.end();
 				isFind = false;
 				settextcolor(RED);
 				outtextxy(m_delEdit->x(), m_delEdit->y() + 50, std::string("没有找到学号为" + str + "的学生！").data());
 			}
-			else
+			else//找到学生
 			{
 				//展示修改学生的输入框
 				for (auto& e : m_stuEdits)
@@ -383,54 +385,39 @@ void Management::manage()
 					e->show();
 				}
 				//设置修改框的文本
-				m_stuEdits[0]->setText(it->name);
-				m_stuEdits[1]->setText(it->sex);
-				m_stuEdits[2]->setText(it->number);
-				m_stuEdits[3]->setText(it->date);
-				m_stuEdits[4]->setText(it->school_year);
-				m_stuEdits[5]->setText(it->id);
-				m_stuEdits[6]->setText(it->college);
-				m_stuEdits[7]->setText(it->major);
-				m_stuEdits[8]->setText(it->cla);
-
-				for (int i = 0; i < m_stuEdits.size(); i++)
+				if(isFirst)
 				{
-						switch (i)
-						{
-						case 0:
-							it->name = m_stuEdits[0]->text();
-							break;
-						case 1:
-							it->sex = m_stuEdits[1]->text();
-							break;
-						case 2:
-							it->number = m_stuEdits[2]->text();
-							break;
-						case 3:
-							it->date = m_stuEdits[3]->text();
-							break;
-						case 4:
-							it->school_year = m_stuEdits[4]->text();
-							break;
-						case 5:
-							it->id = m_stuEdits[5]->text();
-							break;
-						case 6:
-							it->college = m_stuEdits[6]->text();
-							break;
-						case 7:
-							it->major = m_stuEdits[7]->text();
-							break;
-						case 8:
-							it->cla = m_stuEdits[8]->text();
-							break;
-						default:
-							break;
-						}
-						updateTable();
+					m_stuEdits[0]->setText(it->name);
+					m_stuEdits[1]->setText(it->sex);
+					m_stuEdits[2]->setText(it->number);
+					m_stuEdits[3]->setText(it->date);
+					m_stuEdits[4]->setText(it->school_year);
+					m_stuEdits[5]->setText(it->id);
+					m_stuEdits[6]->setText(it->college);
+					m_stuEdits[7]->setText(it->major);
+					m_stuEdits[8]->setText(it->cla);
+					isFirst = false;
 				}
-
 				isFind = true;
+
+				m_modifyIt = it;
+			}	
+		}
+		if (isFind && m_modifyIt != vec_stu.end())
+		{
+			for (int i = 0; i < m_stuEdits.size(); i++)
+			{
+				//把找到的要修改的学生信息更新为最新修改值
+				m_modifyIt->name = m_stuEdits[0]->text();
+				m_modifyIt->sex = m_stuEdits[1]->text();
+				m_modifyIt->number = m_stuEdits[2]->text();
+				m_modifyIt->date = m_stuEdits[3]->text();
+				m_modifyIt->school_year = m_stuEdits[4]->text();
+				m_modifyIt->id = m_stuEdits[5]->text();
+				m_modifyIt->college = m_stuEdits[6]->text();
+				m_modifyIt->major = m_stuEdits[7]->text();
+				m_modifyIt->cla = m_stuEdits[8]->text();
+				updateTable();
 			}
 		}
 
@@ -553,9 +540,9 @@ void Management::eventLoop()
 	m_delEdit->eventLoop(m_msg);
 
 	m_modifyEdit->eventLoop(m_msg);
-	for (auto& e : m_stuEdits)//修改学生的输入框事件循环
+	for (int i = 0; i < 9; i++)
 	{
-		e->eventLoop(m_msg);
+		m_stuEdits[i]->eventLoop(m_msg);
 	}
 }
 

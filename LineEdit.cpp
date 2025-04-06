@@ -74,14 +74,19 @@ bool LineEdit::isClicked()
 
 bool LineEdit::textChanged()
 {
-	if (m_text.empty())//如果没有输入文本
-	{
-		return false;//没有改变
-	}
-	if (m_preText == m_text)
-	{
-		return false;//文本没有改变
-	}
-	m_preText = m_text;//保存上次的文本
-	return true;//否则改变了
+	bool changed = (m_preText != m_text);
+	m_preText = m_text; // 更新前一次文本
+	return changed && !m_text.empty(); // 非空且变化时返回true
+
+
+	//if (m_text.empty())//如果没有输入文本
+	//{
+	//	return false;//没有改变
+	//}
+	//if (m_preText == m_text)
+	//{
+	//	return false;//文本没有改变
+	//}
+	//m_preText = m_text;//保存上次的文本
+	//return true;//否则改变了
 }

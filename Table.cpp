@@ -74,7 +74,7 @@ void Table::drawTableGrid()
 		line(m_x + i * m_gridW, m_y, m_x + i * m_gridW, m_y + m_rows * m_gridH);
 	}
 	//绘制按钮
-	if (m_maxPage > 0)//只有一页不用画
+	if (m_maxPage > 0&& m_showPageBtn)//只有一页不用画
 	{
 		drawButton();
 	}
@@ -194,7 +194,6 @@ void Table::updatePage()
 	}
 	if (m_cols == 0 && !m_datas.empty())
 	{
-		m_cols = m_datas.front().find('\t') + 1;
 	}
 
 	//datas 82

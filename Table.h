@@ -31,6 +31,8 @@ public:
     void eventLoop(const ExMessage& msg);
 
 	void clear() { m_datas.clear(); }//清空数据
+
+    void setShowPageBtn(bool show) { m_showPageBtn = show; }
 private:
     int m_rows;
     int m_cols;
@@ -48,6 +50,8 @@ private:    //分页处理
     int m_curPage;//当前页
     int m_maxPage;//最大页
     int m_extraPage;//如果不是整数页，最后一页剩余多少数据
+
+    bool m_showPageBtn = true; // 控制是否显示分页按钮
 
     PushButton* m_prevBtn;//上一页
     PushButton* m_nextBtn;//下一页

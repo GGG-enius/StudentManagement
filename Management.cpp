@@ -254,51 +254,49 @@ void Management::manage()
 
 		m_delBtn->show();
 		m_delEdit->show();
-		//删除的表格显示条件
-		if(m_delTable->rowCount()!=0)
-		{
-			m_delTable->show();
-		}
-		////如果文本改变 进行一个查找
-		if (m_delEdit->textChanged())
-		{
+		////删除的表格显示条件
+		//if(m_delTable->rowCount()!=0)
+		//{
+		//	m_delTable->show();
+		//}
+
+		// 输入框的实时查找逻辑（仅在未点击删除按钮时执行）
+		if (!m_delEdit->text().empty() && !m_delBtn->isClicked()) {
 			auto& str = m_delEdit->text();
-			//对vec_stu的每个元素调用lambda表达式
-			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu)
-				{
-					return stu.number == str;
+			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu) {
+				return stu.number == str;
 				});
-			//没找到
-			if (it == vec_stu.end())
-			{
+
+			if (it == vec_stu.end()) {
+				// 显示未找到
+				settextcolor(RED);
 				outtextxy(m_delEdit->x(), m_delEdit->y() + 50, std::string("没有找到学号为" + str + "的学生！").data());
 			}
-			else//找到后
-			{
-				m_delTable->insertData(it->formatInfo());//存到表格
+			else {
+				// 显示找到
+				m_delTable->insertData(it->formatInfo());
+				settextcolor(GREEN);
+				outtextxy(m_delEdit->x(), m_delEdit->y() + 50, std::string("找到学号为" + str + "的学生！").data());
+				settextcolor(BLACK);
+				m_delTable->setShowPageBtn(false);//隐藏分页按钮
+				m_delTable->show();
 			}
-			//m_delEdit->clear();
 		}
-		//删除按钮逻辑
-		if (m_delBtn->isClicked()&&!m_delEdit->text().empty())
-		{
-			auto& str = m_delEdit->text();
-			/*
-			* 不会直接删除元素，而是将所有需要保留的元素移动到容器前部，
-			   并返回一个迭代器 it，指向新逻辑结尾的位置（即第一个需要删除的元素的位置）
-			*/
-			auto it = std::remove_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu)
-				{
+		// 删除按钮逻辑
+		if (m_delBtn->isClicked()) {
+			if (!m_delEdit->text().empty()) {
+				auto& str = m_delEdit->text();
+				auto it = std::remove_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu) {
 					return stu.number == str;
-				});
-			//if (it != vec_stu.end())//删除成功时
-			//{
-			//	m_delEdit->clear();
-			//	m_delTable->clear();
-			//}
-			vec_stu.erase(it, vec_stu.end());//删除
-			updateTable();
-			
+					});
+
+				if (it != vec_stu.end()) { // 如果找到并删除了学生
+					vec_stu.erase(it, vec_stu.end());
+					updateTable();
+					m_delEdit->clear();    // 清空输入框
+					m_delTable->clear();   // 清空表格
+				}
+			}
 		}
 		// 返回管理菜单按钮
 		displayBackBtn(1);

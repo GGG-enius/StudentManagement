@@ -74,6 +74,7 @@ private:
 	LineEdit* m_delEdit;//删除学生的输入框
 	Table* m_delTable;//删除学生的表格
 
+
 private://管理子菜单界面切换
 	enum ManangeState
 	{

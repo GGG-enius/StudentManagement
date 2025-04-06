@@ -18,7 +18,7 @@ public:
 	inline const std::string& text()const { return m_text; }
 	void clear() { m_text.clear(); }//添加成功后 调用清空m_text,即可再次添加
 
-	bool textChanged();//文本m_text是否改变
+	bool textChanged();
 private:
 	std::string m_preText;//上次输入的文本
 	std::string m_text;

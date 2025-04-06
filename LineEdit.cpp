@@ -16,7 +16,7 @@ void LineEdit::show()
 	//设置输入框文字的颜色
 	settextcolor(BLACK);
 
-	//把文字居中显示在按钮中间
+	//把文字居中显示在输入框中间
 	int ty = m_y + (m_h - textheight(m_text.c_str())) / 2;
 	//把文字居中显示在按钮中间
 	::outtextxy(m_x, ty, m_text.c_str());//c_str()就是将C++的string转化为C的字符串数组
@@ -26,7 +26,10 @@ void LineEdit::show()
 	{
 		char buf[128];//对话框文字传入的缓冲区
 		InputBox(buf, 128, m_hitText.data(), m_title.data());
-		m_text = buf;
+		if(buf[0]!='\0')//有输入才显示在输入框上，防止输入框的文字被误清空
+		{
+			m_text = buf;
+		}
 		m_dialogShown = true; // 设置标志位为已显示
 	}
 

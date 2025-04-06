@@ -59,7 +59,7 @@ Management::Management()
 	//录入学生界面的按钮和输入框
 	m_addBtn = new PushButton("录入", 900, 260, 80, 30);//录入学生的按钮
 	m_addEdit = new LineEdit(100, 260, 750, 30);
-	m_addEdit->setTitle("请输入学生信息");
+	m_addEdit->setTitle("录入学生");
 	m_addEdit->setHitText("格式:\n <姓名 性别 学号 入学时间 学制 身份证 学院 专业 班级>");
 
 	//删除学生界面的按钮和输入框
@@ -70,6 +70,63 @@ Management::Management()
 	m_delTable = new Table;//删除学生的表格
 	m_delTable->setHeader(m_header);
 	m_delTable->move(m_delEdit->x()-425, m_delEdit->y() + 100);
+
+	//修改学生界面的输入框
+	m_modifyEdit = new LineEdit(440, 260, 200, 30);
+	m_modifyEdit->move((Window::width() - m_modifyEdit->width()) / 2, 260);//居中显示
+	m_modifyEdit->setTitle("修改学生");
+	m_modifyEdit->setHitText("请输入要修改学生的学号");
+
+	for (int i = 0; i < 9; i++)
+	{
+		m_stuEdits.emplace_back(new LineEdit(0, 0, 130, 30));
+		if (i == 0)//姓名
+		{
+			m_stuEdits[i]->move(20 + i * 140, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(50, 30);
+		}
+		if (i == 1)//性别
+		{
+			m_stuEdits[i]->move(20+60, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(50, 30);
+		}
+		if (i == 2)//学号
+		{
+			m_stuEdits[i]->move(80 + 60, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(100, 30);
+		}
+		if (i == 3)//入学时间
+		{
+			m_stuEdits[i]->move(140 + 110, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(80, 30);
+		}
+		if (i == 4)//学制
+		{
+			m_stuEdits[i]->move(250 + 90, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(50, 30);
+		}
+		if (i == 5)//身份证
+		{
+			m_stuEdits[i]->move(340 + 60, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(150, 30);
+		}
+		if (i == 6)//学院
+		{
+			m_stuEdits[i]->move(400 + 160, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(130, 30);
+		}
+		if (i == 7)//专业
+		{
+			m_stuEdits[i]->move(560 + 140, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(100, 30);
+		}
+		if (i == 8)//班级
+		{
+			m_stuEdits[i]->move(700 + 110, m_modifyEdit->y() + 100);
+			m_stuEdits[i]->setFixedSized(50, 30);
+		}
+		
+	}//修改学生信息的输入框的对象创建
 
 	//陈列查询子菜单按钮
 	for (int i = 0; i < search_btns.size(); i++) {
@@ -198,8 +255,6 @@ void Management::manage()
 			}
 			else if (btn->isClicked() && btn->getText() == "修改学生证信息") {
 				m_manageState = Manage_Modify;
-				// 执行修改操作
-				std::cout << "进入修改界面" << std::endl;
 			}
 		}
 		// 返回主菜单按钮
@@ -213,7 +268,7 @@ void Management::manage()
 		
 		// 显示提示信息
 		tip = "请输入学生信息<姓名 性别 学号 入学时间 学制 身份证 学院 专业 班级>:";
-		example = "例：张三 男 202232310229 2022-09-01 4年 440320200312190344 生命科学学院 生命科学 2";
+		example = "例：张三 男 202232310229 2022-09-01 4年 440320200312190344 生命科学学院 生命科学 2班";
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip))/2, 150, tip);
 		settextstyle(&originalFont); // 恢复原字体
@@ -254,11 +309,6 @@ void Management::manage()
 
 		m_delBtn->show();
 		m_delEdit->show();
-		////删除的表格显示条件
-		//if(m_delTable->rowCount()!=0)
-		//{
-		//	m_delTable->show();
-		//}
 
 		// 输入框的实时查找逻辑（仅在未点击删除按钮时执行）
 		if (!m_delEdit->text().empty() && !m_delBtn->isClicked()) {
@@ -303,8 +353,87 @@ void Management::manage()
 		break;
 	case Manage_Modify://修改界面信息
 		// 显示提示信息
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
 		tip = "请输入要修改学生的学号：";
-		outtextxy(100, 100, tip);
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 150, tip);
+		settextstyle(&originalFont); // 恢复原字体
+		m_modifyEdit->show();
+
+		if (!m_modifyEdit->text().empty())
+		{
+			auto& str = m_modifyEdit->text();
+			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu) {
+				return stu.number == str;
+				});
+
+			if (it == vec_stu.end()) {
+				// 显示未找到
+				isFind = false;
+				settextcolor(RED);
+				outtextxy(m_delEdit->x(), m_delEdit->y() + 50, std::string("没有找到学号为" + str + "的学生！").data());
+			}
+			else
+			{
+				//展示修改学生的输入框
+				for (auto& e : m_stuEdits)
+				{
+					e->show();
+				}
+				//设置修改框的文本
+				m_stuEdits[0]->setText(it->name);
+				m_stuEdits[1]->setText(it->sex);
+				m_stuEdits[2]->setText(it->number);
+				m_stuEdits[3]->setText(it->date);
+				m_stuEdits[4]->setText(it->school_year);
+				m_stuEdits[5]->setText(it->id);
+				m_stuEdits[6]->setText(it->college);
+				m_stuEdits[7]->setText(it->major);
+				m_stuEdits[8]->setText(it->cla);
+
+				for (int i = 0; i < m_stuEdits.size(); i++)
+				{
+						switch (i)
+						{
+						case 0:
+							it->name = m_stuEdits[0]->text();
+							break;
+						case 1:
+							it->sex = m_stuEdits[1]->text();
+							break;
+						case 2:
+							it->number = m_stuEdits[2]->text();
+							break;
+						case 3:
+							it->date = m_stuEdits[3]->text();
+							break;
+						case 4:
+							it->school_year = m_stuEdits[4]->text();
+							break;
+						case 5:
+							it->id = m_stuEdits[5]->text();
+							break;
+						case 6:
+							it->college = m_stuEdits[6]->text();
+							break;
+						case 7:
+							it->major = m_stuEdits[7]->text();
+							break;
+						case 8:
+							it->cla = m_stuEdits[8]->text();
+							break;
+						default:
+							break;
+						}
+						updateTable();
+				}
+
+				isFind = true;
+			}
+		}
+
 		// 返回管理菜单按钮
 		displayBackBtn(1);
 		break;
@@ -422,6 +551,12 @@ void Management::eventLoop()
 
 	m_delBtn->eventLoop(m_msg);
 	m_delEdit->eventLoop(m_msg);
+
+	m_modifyEdit->eventLoop(m_msg);
+	for (auto& e : m_stuEdits)//修改学生的输入框事件循环
+	{
+		e->eventLoop(m_msg);
+	}
 }
 
 void Management::readFile(const std::string& fileName)

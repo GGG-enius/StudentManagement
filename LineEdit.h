@@ -8,12 +8,13 @@ public:
 	void show() override;
 	void eventLoop(const ExMessage& msg);//事件循环
 
+	 
 	bool isIn();//判断鼠标是否在当前按钮上
 	bool isClicked();//判断鼠标是否点击了当前按钮
 
 	inline void setTitle(const std::string& title) { m_title = title; }
 	inline void setHitText(const std::string& hitText) { m_hitText = hitText; }
-	//inline void setText(const std::string& text) { m_text = text; }//设置输入框的文本
+	inline void setText(const std::string& text) { m_text = text; }//设置输入框的文本
 	//把输入框输入的信息显示出来
 	inline const std::string& text()const { return m_text; }
 	void clear() { m_text.clear(); }//添加成功后 调用清空m_text,即可再次添加

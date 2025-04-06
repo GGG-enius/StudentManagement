@@ -73,7 +73,10 @@ private:
 	PushButton* m_delBtn;//删除学生的按钮
 	LineEdit* m_delEdit;//删除学生的输入框
 	Table* m_delTable;//删除学生的表格
-
+	
+	LineEdit* m_modifyEdit;//修改学生的输入框
+	bool isFind = false;//判断学生有没有找到 
+	std::vector<LineEdit*> m_stuEdits;//修改学生信息的输入框
 
 private://管理子菜单界面切换
 	enum ManangeState

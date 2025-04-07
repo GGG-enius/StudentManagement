@@ -80,6 +80,10 @@ private:
 	std::vector<LineEdit*> m_stuEdits;//修改学生信息的输入框
 	std::vector<Student>::iterator m_modifyIt;
 
+	LineEdit* m_searchEdit;//查询学生的输入框
+	Table* m_searchTable;//查询学生的表格
+
+	LineEdit* m_searchClassEdit;//查询班级的输入框
 private://管理子菜单界面切换
 	enum ManangeState
 	{
@@ -89,6 +93,14 @@ private://管理子菜单界面切换
 		Manage_Modify
 	};
 	int m_manageState = Manage_Main;
+private://查询子菜单界面切换
+	enum SearchState
+	{
+		Search_Main,
+		Search_stu,
+		Search_class,
+	};
+	int m_searchState = Search_Main;
 private:
 	std::string m_tipText;
 };

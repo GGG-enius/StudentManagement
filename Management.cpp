@@ -137,7 +137,19 @@ Management::Management()
 		int by = vspace + i * search_btns[i]->height();
 		search_btns[i]->move(bx, by+100);
 	}
+	m_searchEdit = new LineEdit(440, 260, 200, 30);//查询输入框初始化
+	m_searchEdit->move((Window::width() - m_modifyEdit->width()) / 2, 260);//居中显示
+	m_searchEdit->setTitle("查询学生");
+	m_searchEdit->setHitText("请输入要查询学生的学号或姓名");
+	m_searchTable = new Table;//查询学生的表格
+	m_searchTable->setHeader(m_header);
+	m_searchTable->move(m_delEdit->x() - 425, m_delEdit->y() + 100);
 	
+	m_searchClassEdit = new LineEdit(440, 260, 300, 30);//查询班级输入框初始化
+	m_searchClassEdit->move((Window::width() - m_searchClassEdit->width()) / 2, 260);//居中显示
+	m_searchEdit->setTitle("查询某班级的所有学生");
+	m_searchEdit->setHitText("请输入要查询的年级 专业 班级");
+
 	//陈列统计子菜单按钮
 	for (int i = 0; i < count_btns.size(); i++) {
 		count_btns[i]->setFixedSized(250, 50);
@@ -429,15 +441,83 @@ void Management::manage()
 
 void Management::search()
 {
-	drawTile();
-	displayBackMenuBtn();
+	const char* tip;
+	const char* example;
 
-	//显示查询子菜单按钮
-	for (auto& btn : search_btns)
+	switch (m_searchState)
 	{
-		btn->show();
-		btn->eventLoop(m_msg);
+	case Search_Main: //查询主菜单
+		drawTile();
+		//显示查询子菜单按钮
+		for (auto& btn : search_btns)
+		{
+			btn->show();
+			btn->eventLoop(m_msg);
+
+			if (btn->isClicked() && btn->getText() == "查询单个学生的信息") {
+				m_searchState = Search_stu; // 切换到查询单个学生的状态
+			}
+			else if (btn->isClicked() && btn->getText() == "查询班级全部学生的信息") {
+				m_searchState = Search_class;//切换到查询班级学生的状态
+			}
+		}
+		// 返回主菜单按钮
+		displayBackMenuBtn();
+		break;
+		
+	case Search_stu:
+		LOGFONT originalFont;
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
+		tip = "请输入要查询学生的学号或姓名：";
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 150, tip);
+		settextstyle(&originalFont);// 恢复原字体
+
+		m_searchEdit->show();
+
+		//没找到的逻辑
+		if (!m_searchEdit->text().empty())
+		{
+			auto& str = m_searchEdit->text();
+			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu) {
+				return stu.number == str||stu.name == str;
+				});
+			if (it == vec_stu.end()) {
+				// 显示未找到
+				settextcolor(RED);
+				outtextxy(m_searchEdit->x(), m_searchEdit->y() + 50, std::string("没有找到该学生！").data());
+			}
+			else
+			{
+				// 显示找到
+				m_searchTable->insertData(it->formatInfo());
+				settextcolor(BLACK);
+				m_searchTable->setShowPageBtn(false);//隐藏分页按钮
+				m_searchTable->show();
+			}
+		}
+		displayBackBtn(2);
+		break;
+	case Search_class:
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
+		tip = "请输入要查询的年级专业班级：";
+		example = "格式：年级 专业 班级";
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 150, tip);
+		settextstyle(&originalFont); // 恢复原字体
+		settextstyle(18, 0, "幼圆");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 200, example);
+		settextstyle(&originalFont); // 恢复原字体
+
+		m_searchEdit->show();
+		displayBackBtn(2);
+		break;
 	}
+	
 
 }
 
@@ -526,6 +606,18 @@ void Management::displayBackBtn(int btnState)
 			m_manageState = Manage_Main;
 		}
 	}
+	else if (btnState == 2)
+	{
+		//设置返回按钮
+		m_backManageBtn->setFixedSized(200, 35);
+		m_backManageBtn->show();
+		m_backManageBtn->eventLoop(m_msg);//将事件分发到返回按钮
+		if (m_backManageBtn->isClicked())
+		{
+			// 返回查询主界面
+			m_searchState = Search_Main;
+		}
+	}
 }
 
 void Management::eventLoop()
@@ -544,6 +636,9 @@ void Management::eventLoop()
 	{
 		m_stuEdits[i]->eventLoop(m_msg);
 	}
+
+	m_searchEdit->eventLoop(m_msg);
+	m_searchClassEdit->eventLoop(m_msg);
 }
 
 void Management::readFile(const std::string& fileName)

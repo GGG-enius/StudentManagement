@@ -17,6 +17,13 @@ std::string Student::formatInfo()
 	return ss.str();
 }
 
+std::string Student::formatInfo2()
+{
+	std::stringstream ss;
+	ss << name << "  " << sex << "  " << number << "  " << date << "  " << school_year << "  " << id << "  " << college << "  " << major << "  " << cla;
+	return ss.str();
+}
+
 Student Student::fromString(const std::string& str)
 {
 	Student stu;

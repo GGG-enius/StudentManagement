@@ -1,5 +1,7 @@
 #include "Table.h"
 #include<iostream>
+#include <algorithm>
+
 Table::Table(int row, int col)
 	:BasicWidget(0, 0, 0, 0), m_rows(row), m_cols(col)
 	,m_curPage(0)
@@ -207,8 +209,6 @@ void Table::updatePage()
 		m_maxPage = m_datas.size() / m_rows;
 		m_extraPage = m_datas.size() % m_rows;
 	}
-	
-	
 }
 
 void Table::eventLoop(const ExMessage& msg)//表格组件把收到的消息传给四个导航按钮

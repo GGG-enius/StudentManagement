@@ -37,6 +37,8 @@ Management::Management()
 	//返回键
 	m_backMenuBtn = new PushButton("返回主菜单");
 	m_backManageBtn = new PushButton("返回信息管理菜单");
+	m_backSearchBtn = new PushButton("返回信息查询菜单");
+	m_backCountBtn = new PushButton("返回信息统计菜单");
 
 	//陈列主菜单按钮
 	for (int i = 0;i < menu_btns.size();i++)
@@ -72,8 +74,9 @@ Management::Management()
 	m_delTable->move(m_delEdit->x()-425, m_delEdit->y() + 100);
 
 	//修改学生界面的输入框
+	m_modifyBtn = new PushButton("修改", 650, 260, 80, 30);//修改学生的按钮
 	m_modifyEdit = new LineEdit(440, 260, 200, 30);
-	m_modifyEdit->move((Window::width() - m_modifyEdit->width()) / 2, 260);//居中显示
+	//m_modifyEdit->move((Window::width() - m_modifyEdit->width()) / 2, 260);//居中显示
 	m_modifyEdit->setTitle("修改学生");
 	m_modifyEdit->setHitText("请输入要修改学生的学号");
 	m_modifyIt = vec_stu.end();
@@ -158,6 +161,19 @@ Management::Management()
 		int by = vspace + i * count_btns[i]->height();
 		count_btns[i]->move(bx, by-100);
 	}
+	m_countCollegeEdit = new LineEdit(440, 150, 200, 30);//统计专业输入框初始化
+	m_countCollegeEdit->setTitle("统计学院数据");
+	m_countCollegeEdit->setHitText("请输入要统计的学院");
+	m_countMajorEdit = new LineEdit(440, 150, 200, 30);//统计专业输入框初始化
+	m_countMajorEdit->setTitle("统计专业数据");
+	m_countMajorEdit->setHitText("请输入要统计的专业");
+	m_countClassEdit = new LineEdit(440, 150, 200, 30);//统计班级输入框初始化
+	m_countClassEdit->setTitle("统计班级数据");
+	m_countClassEdit->setHitText("请输入要统计的班级");
+	m_countGradeEdit = new LineEdit(440, 150, 200, 30);//统计年级输入框初始化
+	m_countGradeEdit->setTitle("统计年级数据");
+	m_countGradeEdit->setHitText("请输入要统计的年级");
+	m_countBtn = new PushButton("统计", 650, 150, 80, 30);//统计按钮初始化
 
 	//初始化查看学生的表格
 	m_showTable = new Table;//new的对象在堆上面，构造函数的在栈内存上 离开作用域后自动释放
@@ -301,6 +317,7 @@ void Management::manage()
 				//m_addEdit->text();
 				m_addEdit->clear();
 				isProcessed = true; // 标记已处理
+				m_manageState = Manage_Main;
 			}
 		}
 		else {
@@ -360,6 +377,7 @@ void Management::manage()
 					m_delTable->clear();   // 清空表格
 				}
 			}
+			m_manageState = Manage_Main;
 		}
 		// 返回管理菜单按钮
 		displayBackBtn(1);
@@ -373,6 +391,7 @@ void Management::manage()
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip)) / 2, 150, tip);
 		settextstyle(&originalFont); // 恢复原字体
+		m_modifyBtn->show();
 		m_modifyEdit->show();
 
 		if (!m_modifyEdit->text().empty())
@@ -431,8 +450,18 @@ void Management::manage()
 				m_modifyIt->cla = m_stuEdits[8]->text();
 				updateTable();
 			}
+			if (m_modifyBtn->isClicked())
+			{
+				isFirst = true;
+				isFind = false;
+				m_modifyIt = vec_stu.end();
+				m_modifyEdit->clear();
+				for (auto& edit : m_stuEdits) {
+					edit->clear();
+				}
+				m_manageState = Manage_Main;
+			}
 		}
-
 		// 返回管理菜单按钮
 		displayBackBtn(1);
 		break;
@@ -464,13 +493,15 @@ void Management::search()
 		// 返回主菜单按钮
 		displayBackMenuBtn();
 		break;
-		
+
 	case Search_stu:
+		m_searchTable->clear();
+
 		LOGFONT originalFont;
 		gettextstyle(&originalFont); // 保存原字体
 		setbkmode(TRANSPARENT);
 
-		tip = "请输入要查询学生的学号或姓名：";
+		tip = "请输入要查询学生的关键词（例如：学号 姓名或性别等）";
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip)) / 2, 150, tip);
 		settextstyle(&originalFont);// 恢复原字体
@@ -480,9 +511,12 @@ void Management::search()
 		//没找到的逻辑
 		if (!m_searchEdit->text().empty())
 		{
+			// 清空旧结果
+			m_searchTable->clear();
+
 			auto& str = m_searchEdit->text();
 			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu) {
-				return stu.number == str||stu.name == str;
+				return stu.number == str || stu.name == str;
 				});
 			if (it == vec_stu.end()) {
 				// 显示未找到
@@ -496,6 +530,11 @@ void Management::search()
 				settextcolor(BLACK);
 				m_searchTable->setShowPageBtn(false);//隐藏分页按钮
 				m_searchTable->show();
+			}
+			if (m_backManageBtn->isClicked())
+			{
+				m_searchTable->clear();
+				m_searchEdit->clear();
 			}
 		}
 		displayBackBtn(2);
@@ -514,22 +553,150 @@ void Management::search()
 		settextstyle(&originalFont); // 恢复原字体
 
 		m_searchEdit->show();
+		std::string input = m_searchEdit->text();
+
+		if (!input.empty())
+		{
+			std::istringstream iss(input);
+			std::string grade, major, cla;
+			iss >> grade >> major >> cla;
+			if (grade.empty() || major.empty() || cla.empty()) {
+				settextcolor(RED);
+				outtextxy(m_searchEdit->x(), m_searchEdit->y() + 50, "输入格式错误，请按格式输入！");
+			}
+			else
+			{
+				//查找符合条件的学生
+				std::vector<Student> results;
+				for (auto& stu : vec_stu)
+				{
+					std::string stuGrade = stu.date.substr(0, 4); // 从入学日期提取年级
+					if (stuGrade == grade && stu.major == major && stu.cla == cla)
+					{
+						results.push_back(stu);
+					}
+				}
+				//显示结果
+				if (results.empty())
+				{
+					settextcolor(RED);
+					outtextxy(m_searchEdit->x(), m_searchEdit->y() + 50, "没有找到符合条件的学生！");
+				}
+				else
+				{
+					for (size_t i = 0; i < results.size(); i++)
+					{
+						outtextxy(m_searchEdit->x() - 200, m_searchEdit->y()+50 + i * 20, results[i].formatInfo2().data());
+					}
+					//for (auto& stu : results)
+					//{
+					//	m_searchTable->insertData(stu.formatInfo());
+					//}
+					//m_searchTable->setShowPageBtn(false);
+					//m_searchTable->updatePage();//更新表格
+					//m_searchTable->show();
+				}
+			}
+		}
+		if (m_backManageBtn->isClicked())
+		{
+			m_searchTable->clear();
+			m_searchEdit->clear();
+		}
 		displayBackBtn(2);
 		break;
-	}
-	
 
+	}
 }
 
 void Management::count()
 {
-	drawTile();
-	displayBackMenuBtn();
-	//显示统计子菜单按钮
-	for (auto& btn : count_btns)
+	const char* tip;
+	switch (m_countState)
 	{
-		btn->show();
-		btn->eventLoop(m_msg);
+	case Count_Main: // 统计主菜单
+		drawTile();
+		//显示统计子菜单按钮
+		for (auto& btn : count_btns)
+		{
+			btn->show();
+			btn->eventLoop(m_msg);
+
+			if (btn->isClicked() && btn->getText() == "统计某学院人数") {
+				m_countState = Count_college; // 切换到统计学院人数的状态
+			}
+			else if (btn->isClicked() && btn->getText() == "统计某专业人数") {
+				m_countState = Count_major;//切换到统计专业人数的状态
+			}
+			else if (btn->isClicked() && btn->getText() == "统计某班级人数") {
+				m_countState = Count_class;//切换到统计班级人数的状态
+			}
+			else if (btn->isClicked() && btn->getText() == "统计某年级人数") {
+				m_countState = Count_grade;//切换到统计年级人数的状态
+			}
+		}
+		displayBackMenuBtn();//返回主菜单按钮
+		break;
+	case Count_college://统计学院人数
+		LOGFONT originalFont;
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
+		tip = "请输入你要查看统计数据的学院：";
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 50, tip);
+		settextstyle(&originalFont);// 恢复原字体
+
+		m_countCollegeEdit->show();
+		m_countBtn->show();
+
+		displayBackBtn(3);
+		break;
+	case Count_major://统计专业人数
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
+		tip = "请输入你要查看统计数据的专业：";
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 50, tip);
+		settextstyle(&originalFont);// 恢复原字体
+
+		m_countMajorEdit->show();
+		m_countBtn->show();
+
+		displayBackBtn(3);
+		break;
+	case Count_class://统计班级人数
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
+		tip = "请输入你要查看统计数据的班级：";
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 50, tip);
+		settextstyle(&originalFont);// 恢复原字体
+
+		m_countClassEdit->show();
+		m_countBtn->show();
+
+		displayBackBtn(3);
+		break;
+	case Count_grade://统计年级人数
+		gettextstyle(&originalFont); // 保存原字体
+		setbkmode(TRANSPARENT);
+
+		tip = "请输入你要查看统计数据的年级：";
+		settextstyle(26, 0, "楷体");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 50, tip);
+		settextstyle(&originalFont);// 恢复原字体
+
+		m_countGradeEdit->show();
+		m_countBtn->show();
+
+		displayBackBtn(3);
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -609,13 +776,25 @@ void Management::displayBackBtn(int btnState)
 	else if (btnState == 2)
 	{
 		//设置返回按钮
-		m_backManageBtn->setFixedSized(200, 35);
-		m_backManageBtn->show();
-		m_backManageBtn->eventLoop(m_msg);//将事件分发到返回按钮
-		if (m_backManageBtn->isClicked())
+		m_backSearchBtn->setFixedSized(200, 35);
+		m_backSearchBtn->show();
+		m_backSearchBtn->eventLoop(m_msg);//将事件分发到返回按钮
+		if (m_backSearchBtn->isClicked())
 		{
 			// 返回查询主界面
 			m_searchState = Search_Main;
+		}
+	}
+	else if (btnState == 3)
+	{
+		//设置返回按钮
+		m_backCountBtn->setFixedSized(200, 35);
+		m_backCountBtn->show();
+		m_backCountBtn->eventLoop(m_msg);//将事件分发到返回按钮
+		if (m_backCountBtn->isClicked())
+		{
+			// 返回统计主界面
+			m_countState = Count_Main;
 		}
 	}
 }
@@ -632,6 +811,7 @@ void Management::eventLoop()
 	m_delEdit->eventLoop(m_msg);
 
 	m_modifyEdit->eventLoop(m_msg);
+	m_modifyBtn->eventLoop(m_msg);
 	for (int i = 0; i < 9; i++)
 	{
 		m_stuEdits[i]->eventLoop(m_msg);
@@ -639,6 +819,14 @@ void Management::eventLoop()
 
 	m_searchEdit->eventLoop(m_msg);
 	m_searchClassEdit->eventLoop(m_msg);
+	m_searchTable->eventLoop(m_msg);
+
+	m_countBtn->eventLoop(m_msg);
+	m_countCollegeEdit->eventLoop(m_msg);
+	m_countMajorEdit->eventLoop(m_msg);
+	m_countClassEdit->eventLoop(m_msg);
+	m_countGradeEdit->eventLoop(m_msg);
+
 }
 
 void Management::readFile(const std::string& fileName)

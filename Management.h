@@ -57,6 +57,8 @@ private:
 	//int m_backBtnState;//返回按钮的状态
 	PushButton* m_backMenuBtn;//返回主菜单按钮
 	PushButton* m_backManageBtn;//返回管理菜单按钮
+	PushButton* m_backSearchBtn;//返回查询菜单按钮
+	PushButton* m_backCountBtn;//返回统计菜单按钮
 
 	int m_currentOp;//保存当前op
 private://读取文件 保存学生信息
@@ -78,12 +80,19 @@ private:
 	bool isFind = false;//判断学生有没有找到 
 	bool isFirst = true;///////重点bug!解决setText()函数的bug
 	std::vector<LineEdit*> m_stuEdits;//修改学生信息的输入框
+	PushButton* m_modifyBtn;//修改学生的按钮
 	std::vector<Student>::iterator m_modifyIt;
 
 	LineEdit* m_searchEdit;//查询学生的输入框
 	Table* m_searchTable;//查询学生的表格
 
 	LineEdit* m_searchClassEdit;//查询班级的输入框
+
+	LineEdit* m_countCollegeEdit;//统计学院输入框
+	LineEdit* m_countMajorEdit;//统计专业输入框
+	LineEdit* m_countClassEdit;//统计班级输入框
+	LineEdit* m_countGradeEdit;//统计年级输入框
+	PushButton* m_countBtn;//统计按钮
 private://管理子菜单界面切换
 	enum ManangeState
 	{
@@ -101,7 +110,15 @@ private://查询子菜单界面切换
 		Search_class,
 	};
 	int m_searchState = Search_Main;
-private:
-	std::string m_tipText;
+private://统计子菜单界面切换
+	enum CountState
+	{
+		Count_Main,
+		Count_college,
+		Count_major,
+		Count_class,
+		Count_grade,
+	};
+	int m_countState = Count_Main;
 };
 

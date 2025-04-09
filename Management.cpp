@@ -612,6 +612,7 @@ void Management::search()
 void Management::count()
 {
 	const char* tip;
+	const char* example;
 	switch (m_countState)
 	{
 	case Count_Main: // 统计主菜单
@@ -642,7 +643,7 @@ void Management::count()
 		gettextstyle(&originalFont); // 保存原字体
 		setbkmode(TRANSPARENT);
 
-		tip = "请输入你要查看统计数据的学院：";
+		tip = "请输入你要统计人数的学院：";
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip)) / 2, 50, tip);
 		settextstyle(&originalFont);// 恢复原字体
@@ -650,13 +651,54 @@ void Management::count()
 		m_countCollegeEdit->show();
 		m_countBtn->show();
 
+		if (m_countBtn->isClicked()&&!m_countCollegeEdit->text().empty())
+		{
+			m_countNum = 0;//学院人数初始化
+			m_countBoys = 0;//男生人数初始化
+			m_countGirls = 0;//女生人数初始化
+			isPressed = true;
+			//遍历学生数据
+			for (auto& stu : vec_stu)
+			{
+				if (stu.college == m_countCollegeEdit->text())
+				{
+					m_countNum++;//该学院人数加一
+					if (stu.sex == "男")
+						m_countBoys++;
+					else if (stu.sex == "女")
+						m_countGirls++;
+				}
+			}
+		}
+		//输出统计结果
+		if (m_countNum == 0&&isPressed)//没找到
+		{
+			settextcolor(RED);
+			outtextxy(m_countCollegeEdit->x(), m_countCollegeEdit->y() + 50, std::string("没有找到学院为" + m_countCollegeEdit->text() + "的学生！").data());
+		}
+		else if (m_countNum != 0 && isPressed)//找到
+		{
+			gettextstyle(&originalFont); // 保存原字体
+			setbkmode(TRANSPARENT);
+			settextstyle(26, 0, "黑体");
+			std::string result = "该学院总人数:" + std::to_string(m_countNum) + "   " + "该学院男生人数:" + std::to_string(m_countBoys) + "   " + "该学院女生人数:" + std::to_string(m_countGirls);
+			settextcolor(BLACK);
+			outtextxy(m_countCollegeEdit->x() - 200, m_countCollegeEdit->y() + 50, result.data());
+			settextstyle(&originalFont);// 恢复原字体
+		}
+
+		if (m_backCountBtn->isClicked())
+		{
+			m_countCollegeEdit->clear();
+			isPressed = false;
+		}
 		displayBackBtn(3);
 		break;
 	case Count_major://统计专业人数
 		gettextstyle(&originalFont); // 保存原字体
 		setbkmode(TRANSPARENT);
 
-		tip = "请输入你要查看统计数据的专业：";
+		tip = "请输入你要统计人数的专业：";
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip)) / 2, 50, tip);
 		settextstyle(&originalFont);// 恢复原字体
@@ -664,20 +706,125 @@ void Management::count()
 		m_countMajorEdit->show();
 		m_countBtn->show();
 
+		//统计专业人数
+		if (m_countBtn->isClicked() && !m_countMajorEdit->text().empty())
+		{
+			m_countNum = 0;//专业人数初始化
+			m_countBoys = 0;//男生人数初始化
+			m_countGirls = 0;//女生人数初始化
+			isPressed = true;
+			//遍历学生数据
+			for (auto& stu : vec_stu)
+			{
+				if (stu.major == m_countMajorEdit->text())
+				{
+					m_countNum++;//该专业人数加一
+					if (stu.sex == "男")
+						m_countBoys++;
+					else if (stu.sex == "女")
+						m_countGirls++;
+				}
+			}
+		}
+		//输出统计结果
+		if (m_countNum == 0 && isPressed)//没找到
+		{
+			settextcolor(RED);
+			outtextxy(m_countMajorEdit->x(), m_countMajorEdit->y() + 50, std::string("没有找到专业为" + m_countMajorEdit->text() + "的学生！").data());
+		}
+		else if (m_countNum != 0 && isPressed)//找到
+		{
+			std::string result = "该专业总人数:" + std::to_string(m_countNum) + "   " + "该专业男生人数:" + std::to_string(m_countBoys) + "   " + "该专业女生人数:" + std::to_string(m_countGirls);
+			gettextstyle(&originalFont); // 保存原字体
+			setbkmode(TRANSPARENT);
+			settextstyle(26, 0, "黑体");
+			settextcolor(BLACK);
+			outtextxy(m_countMajorEdit->x() - 200, m_countMajorEdit->y() + 50, result.data());
+			settextstyle(&originalFont);// 恢复原字体
+		}
+
+		if (m_backCountBtn->isClicked())
+		{
+			m_countMajorEdit->clear();
+			isPressed = false;
+		}
 		displayBackBtn(3);
 		break;
 	case Count_class://统计班级人数
 		gettextstyle(&originalFont); // 保存原字体
 		setbkmode(TRANSPARENT);
 
-		tip = "请输入你要查看统计数据的班级：";
+		tip = "请输入你要查看统计数据的年级专业班级：";
+		example = "格式：年级 专业 班级";
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip)) / 2, 50, tip);
+		settextstyle(18, 0, "幼圆");
+		outtextxy((Window::width() - textwidth(tip)) / 2, 100, example);
 		settextstyle(&originalFont);// 恢复原字体
 
 		m_countClassEdit->show();
 		m_countBtn->show();
 
+		//统计班级人数
+		if (m_countBtn->isClicked() && !m_countClassEdit->text().empty())
+		{
+			m_countNum = 0;//班级人数初始化
+			m_countBoys = 0;//男生人数初始化
+			m_countGirls = 0;//女生人数初始化
+			isPressed = true;
+			//遍历学生数据
+			std::string input = m_countClassEdit->text();
+			std::istringstream iss(input);
+			std::string grade, major, cla;
+			iss >> grade >> major >> cla;
+			if (grade.empty() || major.empty() || cla.empty()) {
+				settextcolor(RED);
+				outtextxy(m_searchEdit->x(), m_searchEdit->y() + 50, "输入格式错误，请按格式输入！");
+			}
+			else
+			{
+				//查找符合条件的学生
+				for (auto& stu : vec_stu)
+				{
+					std::string stuGrade = stu.date.substr(0, 4); // 从入学日期提取年级
+					if (stuGrade == grade && stu.major == major && stu.cla == cla)
+					{
+						m_countNum++;
+						if (stu.sex == "男")
+						{
+							m_countBoys++;
+						}
+						else if (stu.sex == "女")
+						{
+							m_countGirls++;
+						}
+					}
+				}
+			}
+
+		}
+		//输出统计结果
+		if (m_countNum == 0 && isPressed)//没找到
+		{
+			settextcolor(RED);
+			outtextxy(m_countClassEdit->x(), m_countClassEdit->y() + 50, std::string("没有找到班级为" + m_countClassEdit->text() + "的学生！").data());
+		}
+		else if (m_countNum != 0 && isPressed)//找到
+		{
+			std::string result = "该班级总人数:" + std::to_string(m_countNum) + "   " + "该班级男生人数:" + std::to_string(m_countBoys) + "   " + "该班级女生人数:" + std::to_string(m_countGirls);
+			gettextstyle(&originalFont); // 保存原字体
+			setbkmode(TRANSPARENT);
+			settextstyle(26, 0, "黑体");
+			settextcolor(BLACK);
+			outtextxy(m_countClassEdit->x() - 200, m_countClassEdit->y() + 50, result.data());
+			settextstyle(&originalFont);// 恢复原字体
+		}
+
+		if (m_backCountBtn->isClicked())
+		{
+			m_countClassEdit->clear();
+			isPressed = false;
+		}
 		displayBackBtn(3);
 		break;
 	case Count_grade://统计年级人数
@@ -691,6 +838,50 @@ void Management::count()
 
 		m_countGradeEdit->show();
 		m_countBtn->show();
+
+		//统计年级人数
+		if (m_countBtn->isClicked() && !m_countGradeEdit->text().empty())
+		{
+			m_countNum = 0;//年级人数初始化
+			m_countBoys = 0;//男生人数初始化
+			m_countGirls = 0;//女生人数初始化
+			isPressed = true;
+			//遍历学生数据
+			for (auto& stu : vec_stu)
+			{
+				std::string stuGrade = stu.date.substr(0, 4); // 从入学日期提取年级
+				if (stuGrade == m_countGradeEdit->text())
+				{
+					m_countNum++;//该年级人数加一
+					if (stu.sex == "男")
+						m_countBoys++;
+					else if (stu.sex == "女")
+						m_countGirls++;
+				}
+			}
+		}
+		//输出统计结果
+		if (m_countNum == 0 && isPressed)//没找到
+		{
+			settextcolor(RED);
+			outtextxy(m_countGradeEdit->x(), m_countGradeEdit->y() + 50, std::string("没有找到年级为" + m_countGradeEdit->text() + "的学生！").data());
+		}
+		else if (m_countNum != 0 && isPressed)//找到
+		{
+			std::string result = "该年级总人数:" + std::to_string(m_countNum) + "   " + "该年级男生人数:" + std::to_string(m_countBoys) + "   " + "该年级女生人数:" + std::to_string(m_countGirls);
+			gettextstyle(&originalFont); // 保存原字体
+			setbkmode(TRANSPARENT);
+			settextstyle(26, 0, "黑体");
+			settextcolor(BLACK);
+			outtextxy(m_countGradeEdit->x() - 200, m_countGradeEdit->y() + 50, result.data());
+			settextstyle(&originalFont);// 恢复原字体
+		}
+
+		if (m_backCountBtn->isClicked())
+		{
+			m_countGradeEdit->clear();
+			isPressed = false;
+		}
 
 		displayBackBtn(3);
 		break;

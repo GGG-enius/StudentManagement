@@ -88,6 +88,11 @@ private:
 
 	LineEdit* m_searchClassEdit;//查询班级的输入框
 
+	int m_countNum = 0;//统计人数
+	int m_countGirls = 0;//统计女生人数
+	int m_countBoys = 0;//统计男生人数
+	bool isPressed = false;//判断是否按下统计按钮
+
 	LineEdit* m_countCollegeEdit;//统计学院输入框
 	LineEdit* m_countMajorEdit;//统计专业输入框
 	LineEdit* m_countClassEdit;//统计班级输入框

@@ -8,6 +8,7 @@ public:
 		const std::string& school_year, const std::string& id, const std::string& college, const std::string& major, const std::string& cla);
 	std::string formatInfo();//制表符格式化数据
 	std::string formatInfo2();//空格格式化数据
+	std::string formatInfo3();//制表符格式化数据(适用于输出到文件)
 	static Student fromString(const std::string& str);  //根据字符串构造出Student结构体
 
 public:

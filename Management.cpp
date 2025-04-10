@@ -183,6 +183,7 @@ Management::Management()
 	updateTable();
 	//m_backBtnState = 0;
 }
+
 void Management::run()
 {
 	//获取menu的返回值
@@ -227,7 +228,6 @@ void Management::run()
 			count();
 			break;
 		case Management::Exit://当op也就是i为4时进入
-			saveFile("./image/test.txt");
 			exit(0);
 			break;
 		default:
@@ -261,7 +261,6 @@ void Management::display()
 	//设置返回按钮
 	displayBackMenuBtn();
 }
-
 
 void Management::manage()
 {
@@ -314,7 +313,6 @@ void Management::manage()
 				auto str = m_addEdit->text();
 				std::replace(str.begin(), str.end(), ' ', '\t');//把输入的空格替换成'\t'，便于分割
 				m_showTable->insertData(str); //存到表格
-				//m_addEdit->text();
 				m_addEdit->clear();
 				isProcessed = true; // 标记已处理
 				m_manageState = Manage_Main;
@@ -322,6 +320,10 @@ void Management::manage()
 		}
 		else {
 			isProcessed = false; // 按钮未点击时重置状态
+		}
+		if (m_backManageBtn->isClicked())
+		{
+			m_addEdit->clear();
 		}
 		// 返回管理菜单按钮
 		displayBackBtn(1);
@@ -342,6 +344,7 @@ void Management::manage()
 
 		// 输入框的实时查找逻辑（仅在未点击删除按钮时执行）
 		if (!m_delEdit->text().empty() && !m_delBtn->isClicked()) {
+			m_delTable->clear(); // 清空旧数据
 			auto& str = m_delEdit->text();
 			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu) {
 				return stu.number == str;
@@ -378,6 +381,11 @@ void Management::manage()
 				}
 			}
 			m_manageState = Manage_Main;
+		}
+		if (m_backManageBtn->isClicked())
+		{
+			m_delEdit->clear();
+			m_delTable->clear();
 		}
 		// 返回管理菜单按钮
 		displayBackBtn(1);
@@ -537,6 +545,11 @@ void Management::search()
 				m_searchEdit->clear();
 			}
 		}
+		if (m_backSearchBtn->isClicked())
+		{
+			m_searchEdit->clear();
+			m_searchTable->clear();
+		}
 		displayBackBtn(2);
 		break;
 	case Search_class:
@@ -602,6 +615,11 @@ void Management::search()
 		{
 			m_searchTable->clear();
 			m_searchEdit->clear();
+		}
+		if (m_backSearchBtn->isClicked())
+		{
+			m_searchEdit->clear();
+			m_searchTable->clear();
 		}
 		displayBackBtn(2);
 		break;
@@ -937,7 +955,6 @@ void Management::drawTile()
 	settextstyle(&originalFont); // 恢复原字体
 }
 
-
 void Management::displayBackMenuBtn()
 {
 	//设置返回按钮
@@ -1049,14 +1066,14 @@ void Management::readFile(const std::string& fileName)
 		//把数据以空格分隔流进stu的成员变量
 		ss >> stu.name >> stu.sex >> stu.number >> stu.date >> stu.school_year >> stu.id >> stu.college >> stu.major >> stu.cla;
 		vec_stu.push_back(stu);//stu存好文件中的数据后存入vec_stu
-		//cout << stu.name + " " << stu.sex + " " << stu.number + " " << stu.date + " " << stu.school_year + " " << stu.id + " " << stu.college + " " <<stu.major + " " << stu.cla<< endl;
+		
 	}
 	read.close();
 }
 
 void Management::saveFile(const std::string& fileName)
 {
-	fstream write(fileName, ios::out | ios::trunc);//写和创建 
+	fstream write(fileName, ios::out);//写和创建 
 	if (!write.is_open())
 	{
 		cerr << fileName << "file open failed" << endl;
@@ -1068,7 +1085,7 @@ void Management::saveFile(const std::string& fileName)
 	//写数据
 	for (auto& val : vec_stu)
 	{
-		std::string info = val.formatInfo();
+		std::string info = val.formatInfo3();
 		write.write(info.c_str(), info.size());
 	}
 	write.close();

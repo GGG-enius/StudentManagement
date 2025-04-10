@@ -510,9 +510,13 @@ void Management::search()
 		setbkmode(TRANSPARENT);
 
 		tip = "请输入要查询学生的关键词（例如：学号 姓名或性别等）";
+		example = "空格分隔多个条件，如：张 男";
 		settextstyle(26, 0, "楷体");
 		outtextxy((Window::width() - textwidth(tip)) / 2, 150, tip);
-		settextstyle(&originalFont);// 恢复原字体
+		settextstyle(&originalFont); // 恢复原字体
+		settextstyle(18, 0, "幼圆");
+		outtextxy((Window::width() - textwidth(tip)) / 2+100, 200, example);
+		settextstyle(&originalFont); // 恢复原字体
 
 		m_searchEdit->show();
 
@@ -522,27 +526,50 @@ void Management::search()
 			// 清空旧结果
 			m_searchTable->clear();
 
-			auto& str = m_searchEdit->text();
-			auto it = std::find_if(vec_stu.begin(), vec_stu.end(), [=](const Student& stu) {
-				return stu.number == str || stu.name == str;
-				});
-			if (it == vec_stu.end()) {
-				// 显示未找到
+			// 分割查询条件,存入keywords
+			std::vector<std::string> keywords;
+			std::istringstream iss(m_searchEdit->text());
+			std::string keyword;
+			while (iss >> keyword) {
+				keywords.push_back(keyword);
+			}
+			// 查找匹配的学生
+			std::vector<Student> results;
+			for (const auto& stu : vec_stu) {
+				bool matchAll = true;
+				for (const auto& kw : keywords) {
+					bool found =
+						stu.name.find(kw) != std::string::npos ||
+						stu.sex.find(kw) != std::string::npos ||
+						stu.number.find(kw) != std::string::npos ||
+						stu.date.find(kw) != std::string::npos ||
+						stu.school_year.find(kw) != std::string::npos ||
+						stu.id.find(kw) != std::string::npos ||
+						stu.college.find(kw) != std::string::npos ||
+						stu.major.find(kw) != std::string::npos ||
+						stu.cla.find(kw) != std::string::npos;
+
+					if (!found) {
+						matchAll = false;
+						break;
+					}
+				}
+				if (matchAll) {
+					results.push_back(stu);
+				}
+			}
+			// 显示结果
+			if (results.empty()) {
 				settextcolor(RED);
-				outtextxy(m_searchEdit->x(), m_searchEdit->y() + 50, std::string("没有找到该学生！").data());
+				outtextxy(m_searchEdit->x(), m_searchEdit->y() + 50, "没有找到匹配的学生！");
 			}
-			else
-			{
-				// 显示找到
-				m_searchTable->insertData(it->formatInfo());
+			else {
 				settextcolor(BLACK);
-				m_searchTable->setShowPageBtn(false);//隐藏分页按钮
-				m_searchTable->show();
-			}
-			if (m_backManageBtn->isClicked())
-			{
-				m_searchTable->clear();
-				m_searchEdit->clear();
+				int yPos = m_searchEdit->y() + 50;
+				for (size_t i = 0; i < results.size(); i++)
+				{
+					outtextxy(m_searchEdit->x() - 200, m_searchEdit->y() + 50 + i * 20, results[i].formatInfo2().data());
+				}
 			}
 		}
 		if (m_backSearchBtn->isClicked())

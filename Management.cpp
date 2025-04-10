@@ -180,6 +180,11 @@ Management::Management()
 	m_showTable->setRowCount(16);
 	m_showTable->setHeader(m_header);
 	m_showTable->move((Window::width()-m_showTable->width())/2, 100);
+
+	//查看所有学生的保存按钮初始化
+	m_saveBtn = new PushButton("保存");//保存按钮
+	m_saveBtn->move(m_showTable->x()+m_showTable->width()-100, m_showTable->height() + 100);
+	m_saveBtn->setFixedSized(100, 30);
 	updateTable();
 	//m_backBtnState = 0;
 }
@@ -257,7 +262,11 @@ int Management::menu()
 void Management::display()
 {
 	m_showTable->show();
-	//cout << "display" << endl;
+	m_saveBtn->show();
+	if (m_saveBtn->isClicked())
+	{
+		saveFile("./image/student.txt");//保存文件
+	}
 	//设置返回按钮
 	displayBackMenuBtn();
 }
@@ -530,7 +539,7 @@ void Management::search()
 			std::vector<std::string> keywords;
 			std::istringstream iss(m_searchEdit->text());
 			std::string keyword;
-			while (iss >> keyword) {
+			while (iss >> keyword) { // 按空格分割关键词
 				keywords.push_back(keyword);
 			}
 			// 查找匹配的学生
@@ -538,6 +547,8 @@ void Management::search()
 			for (const auto& stu : vec_stu) {
 				bool matchAll = true;
 				for (const auto& kw : keywords) {
+					//find函数用于查找子串，找到返回索引，未查到到返回npos
+					//find(要找的子串)
 					bool found =
 						stu.name.find(kw) != std::string::npos ||
 						stu.sex.find(kw) != std::string::npos ||
@@ -548,10 +559,10 @@ void Management::search()
 						stu.college.find(kw) != std::string::npos ||
 						stu.major.find(kw) != std::string::npos ||
 						stu.cla.find(kw) != std::string::npos;
-
+					//只要学生的任意一个属性包含关键词 kw，found 就为 true
 					if (!found) {
 						matchAll = false;
-						break;
+						break;//如果有一个关键词没有找到，就跳出循环，matchAll不能为false
 					}
 				}
 				if (matchAll) {
@@ -1037,6 +1048,7 @@ void Management::displayBackBtn(int btnState)
 void Management::eventLoop()
 {
 	m_showTable->eventLoop(m_msg);//把收到的事件消息m_msg传（分发）给表格组件
+	m_saveBtn->eventLoop(m_msg);
 	m_delTable->eventLoop(m_msg);
 
 	m_addBtn->eventLoop(m_msg);
@@ -1098,23 +1110,41 @@ void Management::readFile(const std::string& fileName)
 	read.close();
 }
 
+//void Management::saveFile(const std::string& fileName)
+//{
+//	fstream write(fileName, ios::out);//写
+//	if (!write.is_open())
+//	{
+//		cerr << fileName << "file open failed" << endl;
+//		return;
+//	}
+//	//写表头
+//	m_header += "\n";//给表头添加一个换行
+//	write.write(m_header.c_str(), m_header.size());
+//	//写数据
+//	for (auto& val : vec_stu)
+//	{
+//		std::string info = val.formatInfo3();
+//		write.write(info.c_str(), info.size());
+//	}
+//	write.close();
+//}
 void Management::saveFile(const std::string& fileName)
 {
-	fstream write(fileName, ios::out);//写和创建 
-	if (!write.is_open())
-	{
-		cerr << fileName << "file open failed" << endl;
+	fstream write(fileName, ios::out);
+	if (!write.is_open()) {
+		cerr << fileName << "文件打开失败" << endl;
 		return;
 	}
-	//写表头
-	m_header += "\n";//给表头添加一个换行
-	write.write(m_header.c_str(), m_header.size());
-	//写数据
-	for (auto& val : vec_stu)
-	{
-		std::string info = val.formatInfo3();
-		write.write(info.c_str(), info.size());
+
+	// 写入原始表头（不修改m_header变量）
+	write << m_header << "\n"; // 添加换行符
+
+	// 写入数据（每个学生信息后加换行）
+	for (auto& val : vec_stu) {
+		write << val.formatInfo3() << "\n";
 	}
+
 	write.close();
 }
 

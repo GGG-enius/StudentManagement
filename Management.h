@@ -66,6 +66,7 @@ private://读取文件 保存学生信息
 	std::vector<Student> vec_stu;
 private: 
 	Table* m_showTable;//查看学生表格
+	PushButton* m_saveBtn;//保存按钮
 
 	bool isProcessed; // 记录按钮处理状态
 

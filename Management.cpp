@@ -266,6 +266,7 @@ void Management::display()
 	if (m_saveBtn->isClicked())
 	{
 		saveFile("./image/student.txt");//保存文件
+		m_currentOp = Menu;
 	}
 	//设置返回按钮
 	displayBackMenuBtn();

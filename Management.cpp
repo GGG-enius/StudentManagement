@@ -318,6 +318,7 @@ void Management::manage()
 
 		// 检测按钮点击并确保仅触发一次
 		if (m_addBtn->isClicked()&&!(m_addEdit->text().empty())) {
+		
 			if (!isProcessed) {
 				vec_stu.push_back(Student::fromString(m_addEdit->text()));//存到stu的存储数组
 				auto str = m_addEdit->text();
@@ -478,6 +479,13 @@ void Management::manage()
 					edit->clear();
 				}
 				m_manageState = Manage_Main;
+			}
+		}
+		if (m_backManageBtn->isClicked())
+		{
+			m_modifyEdit->clear();
+			for (auto& edit : m_stuEdits) {
+				edit->clear();
 			}
 		}
 		// 返回管理菜单按钮
@@ -1111,25 +1119,6 @@ void Management::readFile(const std::string& fileName)
 	read.close();
 }
 
-//void Management::saveFile(const std::string& fileName)
-//{
-//	fstream write(fileName, ios::out);//写
-//	if (!write.is_open())
-//	{
-//		cerr << fileName << "file open failed" << endl;
-//		return;
-//	}
-//	//写表头
-//	m_header += "\n";//给表头添加一个换行
-//	write.write(m_header.c_str(), m_header.size());
-//	//写数据
-//	for (auto& val : vec_stu)
-//	{
-//		std::string info = val.formatInfo3();
-//		write.write(info.c_str(), info.size());
-//	}
-//	write.close();
-//}
 void Management::saveFile(const std::string& fileName)
 {
 	fstream write(fileName, ios::out);

@@ -175,15 +175,6 @@ const std::vector<std::string> Table::split(std::string str, char separator)
 		// 用 substr 截取剩余部分（避免越界）
 		str = str.substr(pos + 1);  //! 注意这里直接用 std::string 操作
 	}
-	//for (size_t pos = 0;pos != std::string::npos; )
-	//{
-	//	//查找指定分割字符的位置
-	//	pos = str.find(separator);//传进来的字符串str中查找\t
-	//	//取出字符串 0-pos
-	//	res.push_back(str.substr(0, pos));
-	//	//把剩下的字符串保存到str
-	//	str = std::string(str.c_str() + pos + 1);
-	//}
 	return res;
 }
 

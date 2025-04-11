@@ -739,7 +739,7 @@ void Management::count()
 		if (m_countNum == 0&&isPressed)//没找到
 		{
 			settextcolor(RED);
-			outtextxy(m_countCollegeEdit->x(), m_countCollegeEdit->y() + 50, std::string("没有找到学院为" + m_countCollegeEdit->text() + "的学生！").data());
+			outtextxy(m_countCollegeEdit->x(), m_countCollegeEdit->y() + 50, "没有找到该学院的学生！");
 		}
 		else if (m_countNum != 0 && isPressed)//找到
 		{
@@ -795,7 +795,7 @@ void Management::count()
 		if (m_countNum == 0 && isPressed)//没找到
 		{
 			settextcolor(RED);
-			outtextxy(m_countMajorEdit->x(), m_countMajorEdit->y() + 50, std::string("没有找到专业为" + m_countMajorEdit->text() + "的学生！").data());
+			outtextxy(m_countMajorEdit->x(), m_countMajorEdit->y() + 50, "没有找到该专业的学生！");
 		}
 		else if (m_countNum != 0 && isPressed)//找到
 		{
@@ -872,7 +872,7 @@ void Management::count()
 		if (m_countNum == 0 && isPressed)//没找到
 		{
 			settextcolor(RED);
-			outtextxy(m_countClassEdit->x(), m_countClassEdit->y() + 50, std::string("没有找到班级为" + m_countClassEdit->text() + "的学生！").data());
+			outtextxy(m_countClassEdit->x(), m_countClassEdit->y() + 50, std::string("没有找到该班级的学生！").data());
 		}
 		else if (m_countNum != 0 && isPressed)//找到
 		{
@@ -929,7 +929,7 @@ void Management::count()
 		if (m_countNum == 0 && isPressed)//没找到
 		{
 			settextcolor(RED);
-			outtextxy(m_countGradeEdit->x(), m_countGradeEdit->y() + 50, std::string("没有找到年级为" + m_countGradeEdit->text() + "的学生！").data());
+			outtextxy(m_countGradeEdit->x(), m_countGradeEdit->y() + 50, std::string("没有找到该年级的学生！").data());
 		}
 		else if (m_countNum != 0 && isPressed)//找到
 		{

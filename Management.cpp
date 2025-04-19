@@ -384,7 +384,7 @@ void Management::manage()
 					return stu.number == str;
 					});
 
-				if (it != vec_stu.end()) { // 如果找到并删除了学生
+				if (it != vec_stu.end()) { 
 					vec_stu.erase(it, vec_stu.end());
 					updateTable();
 					m_delEdit->clear();    // 清空输入框
